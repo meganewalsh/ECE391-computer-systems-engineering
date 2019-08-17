@@ -1,0 +1,29 @@
+Team 5: Polygon  Bug Log
+
+Checkpoint 1:
+* GDT/IDT did not have assembly linkage, so the IRET was not working correctly, we added linkage and then it worked correctly
+* send_eoi() did not originally send the EOI to both the slave and master, but only to the slave
+* system calls’ privilege level was set to kernel instead of user, so that when we wrote the system call code we would get privilege level errors
+* Keyboard was sending the resend signal for a full command, while we were expecting a byte resend-- this caused issues on a Mac, but worked fine on Windows machines.
+
+Checkpoint 2:
+* term_read() used memcpy() to buffer with size of terminal buffer instead of min(terminal buffer size, nbytes). This would have caused page fault or mem access issue
+* Arrow keys pressed returned numerical values instead of nothing; not a large bug, but just unexpected behavior
+* inode pointer was off and causing exception. Changed boot block to int type before adding byte offset.
+
+Checkpoint 3:
+* Unable to read/write to FD 0 and 1, because they were considered invalid FDs in the system calls.
+* Forgot to close file after reading program in __load_program()
+* Halt error code was not getting passed properly through EAX. This turned out to be a C-inline-asm issue. Adding EAX to the “Clobbers” list solved the issue.
+* File name comparison in get_dentry_by_name was not catching invalid file names like "shel". Added additional comparison of dentry name's length.
+* system_call_handler_failure needed a ret from the dispatcher call before registers are restored and IRET
+* term_open stdin and stdout conditionals were opposite (== vs !=)
+
+Checkpoint 4:
+* Page mapping for 4kB pages was causing Page Faults in User Mode because the page directory entry did not have user set
+* When receiving a tab from the keyboard, enough spaces should be added to get to the nearest terminal buffer index divisible by 4 (i.e. 1-4 spaces). Backspacing would then remove these characters like they are normal spaces.
+
+Checkpoint 5:
+* The tss.esp0 was not updated when running standard interrupt code so if a process was rescheduled while it was in kernel mode, tss.esp0 would be set to just above that kernel code stack. When it was rescheduled, esp would return there, it would finish the kernel code and iret, but the tss.esp0 still pointed to the top of the old stack, which means that when another interrupt was handled the stack was shifted down by some amount. This behavior resulted in a kernel stack overflow. 
+* While setting up the video pages for each terminal we memset all the 4kB with 0x00 instead of 0x0720, which is the space character with the VGA attributes set, which meant when we ran a program that used video memory on the second or third terminal, the program could not write on top of the 0x00.
+* Page Faulting occurred when switching back to different processes. Turns out scheduler code forgot to re-map user program page (128MB) on process switch so the same physical space was being used for all processes.

@@ -1,0 +1,25 @@
+boot.o: boot.S multiboot.h x86_desc.h types.h
+x86_desc.o: x86_desc.S x86_desc.h types.h
+file_sys.o: file_sys.c file_sys.h types.h file.h lib.h rtc.h tests.h \
+  paging.h term.h pcb.h
+i8259.o: i8259.c i8259.h types.h lib.h
+idt.o: idt.c x86_desc.h types.h idt.h lib.h device/keyboard.h \
+  device/../types.h rtc.h tests.h file.h system.h scheduler.h pit.h
+kernel.o: kernel.c multiboot.h types.h x86_desc.h lib.h i8259.h \
+  device/keyboard.h device/../types.h debug.h tests.h rtc.h file.h idt.h \
+  paging.h file_sys.h system.h pcb.h term.h pit.h scheduler.h
+lib.o: lib.c lib.h types.h i8259.h
+paging.o: paging.c lib.h types.h paging.h
+pcb.o: pcb.c lib.h types.h pcb.h file.h scheduler.h term.h x86_desc.h
+pit.o: pit.c pit.h types.h lib.h i8259.h scheduler.h
+rtc.o: rtc.c rtc.h types.h tests.h file.h lib.h i8259.h pcb.h
+scheduler.o: scheduler.c lib.h types.h paging.h system.h i8259.h \
+  scheduler.h pcb.h file.h x86_desc.h
+system.o: system.c file_sys.h types.h file.h lib.h idt.h x86_desc.h \
+  paging.h pcb.h rtc.h tests.h system.h scheduler.h term.h
+term.o: term.c term.h types.h file.h lib.h pcb.h paging.h scheduler.h
+tests.o: tests.c tests.h x86_desc.h types.h lib.h paging.h rtc.h file.h \
+  term.h pcb.h device/keyboard.h device/../types.h file_sys.h system.h
+keyboard.o: device/keyboard.c device/keyboard.h device/../types.h \
+  device/../lib.h device/../types.h device/../i8259.h device/../term.h \
+  device/../file.h device/../lib.h device/../pcb.h
